@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>基金管理升级版</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    padding:12px;
+    font-family:Arial,Helvetica,sans-serif;
+    background:#f3f6fb;
+    color:#222;
+}
+.wrap{max-width:920px;margin:auto}
+
+/* 卡片 */
+.card{
+    background:#fff;
+    border-radius:16px;
+    box-shadow:0 6px 18px rgba(0,0,0,.06);
+    padding:12px;
+    margin-bottom:12px;
+}
+
+/* 顶部总览 */
+.summary{
+    background:linear-gradient(135deg,#2563eb,#3b82f6,#60a5fa);
+    color:#fff;
+    border-radius:18px;
+    padding:14px;
+    box-shadow:0 10px 24px rgba(37,99,235,.25);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+}
+.sumLeft{flex:1;min-width:0}
+.summary .small{
+    font-size:14px;
+    opacity:.95;
+}
+.summary .money{
+    font-size:26px;
+    font-weight:700;
+    margin:4px 0;
+}
+.summaryRight{
+    text-align:right;
+    font-size:13px;
+    opacity:.95;
+    min-width:110px;
+    white-space:nowrap;
+    font-weight:600;
+}
+.summaryRight b{
+    display:inline;
+    font-size:18px;
+    font-weight:700;
+}
+
+/* 顶部按钮 */
+.topbar{
+    display:flex;
+    gap:6px;
+    flex-wrap:nowrap;
+}
+.topbar button{
+    flex:1;
+    min-width:0;
+    padding:8px 4px;
+    font-size:12px;
+    white-space:nowrap;
+}
+
+/* 按钮 */
+button{
+    border:none;
+    border-radius:10px;
+    cursor:pointer;
+}
+.primary{background:#2563eb;color:#fff}
+.gray{background:#eef2f7;color:#333}
+.red{background:#dc2626;color:#fff}
+.green{background:#16a34a;color:#fff}
+
+/* 类型标题 */
+.typeHead{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+.typeTitle{
+    flex:1;
+    font-size:18px;
+    font-weight:700;
+    cursor:pointer;
+}
+.typeMoney{
+    font-size:14px;
+    color:#2563eb;
+    font-weight:700;
+}
+.smallBtn{
+    padding:6px 10px;
+    border-radius:999px;
+    font-size:12px;
+}
+
+/* 基金 */
+.fund{
+    margin-top:8px;
+    border:1px solid #eef2f7;
+    border-radius:12px;
+    padding:10px;
+    cursor:pointer;
+    transition:.15s;
+}
+.fund:hover{background:#f8fbff}
+.fundRow{
+    display:flex;
+    align-items:center;
+    gap:8px;
+}
+.fundName{
+    flex:1;
+    font-size:15px;
+    font-weight:700;
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
+}
+.fundInfo{
+    font-size:14px;
+    color:#2563eb;
+    font-weight:700;
+}
+.fundCode{
+    margin-top:4px;
+    font-size:12px;
+    color:#777;
+}
+.empty{
+    color:#888;
+    font-size:13px;
+    padding:8px 0 2px;
+}
+
+/* 表单 */
+input,select{
+    width:100%;
+    padding:10px;
+    border:1px solid #d8deea;
+    border-radius:10px;
+    font-size:14px;
+    margin-bottom:8px;
+}
+.row2{
+    display:flex;
+    gap:8px;
+}
+.row2>*{flex:1}
+
+/* 弹窗 */
+.modal{
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,.45);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:18px;
+    z-index:999;
+}
+.modal.show{display:flex}
+.box{
+    width:100%;
+    max-width:420px;
+    background:#fff;
+    border-radius:18px;
+    padding:16px;
+}
+.box h3{
+    margin:0 0 12px;
+    font-size:18px;
+}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+<div id="summaryBox"></div>
+
+<div class="card">
+    <div class="topbar">
+        <button class="primary" onclick="addType()">新增类型</button>
+        <button class="gray" onclick="sortByAmount()">排序</button>
+        <button class="gray" onclick="exportJSON()">导出</button>
+        <button class="gray" onclick="importJSONClick()">导入</button>
+        <button class="gray" onclick="exportExcel()">Excel</button>
+        <input type="file" id="fileIn" accept=".json" style="display:none">
+    </div>
+</div>
+
+<div id="app"></div>
+
+</div>
+
+<!-- 弹窗 -->
+<div class="modal" id="modal">
+    <div class="box" id="modalBox"></div>
+</div>
+
+<script>
+let data = JSON.parse(localStorage.getItem("fundManagerData") || "[]");
+
+/* 保存 */
+function save(){
+    localStorage.setItem("fundManagerData",JSON.stringify(data));
+    render();
+}
+
+/* 月换算 */
+function monthlyFund(f){
+    let a=parseFloat(f.amount)||0;
+    if(f.cycle==="日") return a*22;
+    if(f.cycle==="周") return a*4;
+    return a;
+}
+function monthlyType(t){
+    return t.funds.reduce((s,f)=>s+monthlyFund(f),0);
+}
+
+/* 渲染 */
+function render(){
+
+    let total=data.reduce((s,t)=>s+monthlyType(t),0);
+    let count=data.reduce((s,t)=>s+t.funds.length,0);
+
+    summaryBox.innerHTML=`
+        <div class="summary">
+            <div class="sumLeft">
+                <div class="small">预计每月总定投</div>
+                <div class="money">¥ ${total.toFixed(0)}</div>
+            </div>
+            <div class="summaryRight">
+                <b>${count}</b>支基金 / ${data.length}类
+            </div>
+        </div>
+    `;
+
+    app.innerHTML=data.map(t=>`
+        <div class="card">
+            <div class="typeHead">
+                <div class="typeTitle" onclick="editType(${t.id})">${t.name}</div>
+                <div class="typeMoney">月投 ¥${monthlyType(t).toFixed(0)}</div>
+                <button class="green smallBtn" onclick="event.stopPropagation();addFund(${t.id})">+基金</button>
+            </div>
+
+            ${t.funds.length===0?`<div class="empty">暂无基金</div>`:''}
+
+            ${t.funds.map(f=>`
+                <div class="fund" onclick="editFund(${t.id},${f.id})">
+                    <div class="fundRow">
+                        <div class="fundName">${f.name}</div>
+                        <div class="fundInfo">¥${f.amount}/${f.cycle}</div>
+                    </div>
+                    <div class="fundCode">${f.code||''}</div>
+                </div>
+            `).join("")}
+        </div>
+    `).join("");
+}
+
+/* 类型 */
+function addType(){
+showModal(`
+<h3>新增基金类型</h3>
+<input id="newTypeName" placeholder="例如：指数基金">
+<div class="row2">
+<button class="gray" onclick="closeModal()">取消</button>
+<button class="primary" onclick="confirmAddType()">确定</button>
+</div>
+`);
+}
+function confirmAddType(){
+let n=newTypeName.value.trim();
+if(!n)return;
+data.push({id:Date.now(),name:n,funds:[]});
+closeModal();save();
+}
+
+function editType(id){
+let t=data.find(x=>x.id===id);
+showModal(`
+<h3>编辑基金类型</h3>
+<input id="editTypeName" value="${t.name}">
+<div class="row2">
+<button class="red" onclick="deleteType(${id})">删除</button>
+<button class="primary" onclick="saveType(${id})">保存</button>
+</div>
+`);
+}
+function saveType(id){
+let t=data.find(x=>x.id===id);
+t.name=editTypeName.value.trim()||t.name;
+closeModal();save();
+}
+function deleteType(id){
+if(!confirm("确定删除该类型及全部基金？"))return;
+data=data.filter(x=>x.id!==id);
+closeModal();save();
+}
+
+/* 基金 */
+function addFund(tid){
+showModal(`
+<h3>新增基金</h3>
+<input id="fname" placeholder="基金名">
+<input id="fcode" placeholder="基金代码">
+<input id="famt" placeholder="金额">
+<select id="fcyc">
+<option>日</option>
+<option>周</option>
+<option selected>月</option>
+</select>
+<div class="row2">
+<button class="gray" onclick="closeModal()">取消</button>
+<button class="primary" onclick="confirmAddFund(${tid})">保存</button>
+</div>
+`);
+}
+function confirmAddFund(tid){
+let t=data.find(x=>x.id===tid);
+t.funds.push({
+id:Date.now(),
+name:fname.value.trim(),
+code:fcode.value.trim(),
+amount:famt.value.trim(),
+cycle:fcyc.value
+});
+closeModal();save();
+}
+
+function editFund(tid,fid){
+let t=data.find(x=>x.id===tid);
+let f=t.funds.find(x=>x.id===fid);
+
+showModal(`
+<h3>编辑基金</h3>
+<input id="ename" value="${f.name}">
+<input id="ecode" value="${f.code||''}">
+<input id="eamt" value="${f.amount}">
+<select id="ecyc">
+<option ${f.cycle==="日"?"selected":""}>日</option>
+<option ${f.cycle==="周"?"selected":""}>周</option>
+<option ${f.cycle==="月"?"selected":""}>月</option>
+</select>
+<div class="row2">
+<button class="red" onclick="deleteFund(${tid},${fid})">删除</button>
+<button class="primary" onclick="saveFund(${tid},${fid})">保存</button>
+</div>
+`);
+}
+function saveFund(tid,fid){
+let t=data.find(x=>x.id===tid);
+let f=t.funds.find(x=>x.id===fid);
+f.name=ename.value.trim();
+f.code=ecode.value.trim();
+f.amount=eamt.value.trim();
+f.cycle=ecyc.value;
+closeModal();save();
+}
+function deleteFund(tid,fid){
+if(!confirm("确定删除该基金？"))return;
+let t=data.find(x=>x.id===tid);
+t.funds=t.funds.filter(x=>x.id!==fid);
+closeModal();save();
+}
+
+/* 排序 */
+function sortByAmount(){
+data.sort((a,b)=>monthlyType(b)-monthlyType(a));
+save();
+}
+
+/* 弹窗 */
+function showModal(html){
+modalBox.innerHTML=html;
+modal.classList.add("show");
+}
+function closeModal(){
+modal.classList.remove("show");
+}
+modal.onclick=function(e){
+if(e.target===modal)closeModal();
+}
+
+/* 导出 */
+function exportJSON(){
+let blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+let a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="基金备份.json";
+a.click();
+}
+
+/* 导入 */
+function importJSONClick(){fileIn.click();}
+fileIn.onchange=function(e){
+let f=e.target.files[0];
+if(!f)return;
+let r=new FileReader();
+r.onload=function(){
+data=JSON.parse(r.result);
+save();
+};
+r.readAsText(f);
+};
+
+/* Excel */
+function exportExcel(){
+let rows=[['基金类型','基金名','代码','金额','周期','月换算']];
+data.forEach(t=>{
+t.funds.forEach(f=>{
+rows.push([
+t.name,f.name,f.code||'',f.amount,f.cycle,monthlyFund(f)
+]);
+});
+});
+let csv='\ufeff'+rows.map(r=>r.join(',')).join('\n');
+let blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+let a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="基金表格.csv";
+a.click();
+}
+
+render();
+</script>
+</body>
+</html>
