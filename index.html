@@ -1,10 +1,8 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon.svg">
-<meta name="theme-color" content="#2563eb">
-<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#2563eb">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -24,7 +22,6 @@ body{
 }
 .wrap{max-width:920px;margin:auto}
 
-/* 卡片 */
 .card{
     background:#fff;
     border-radius:16px;
@@ -33,7 +30,6 @@ body{
     margin-bottom:12px;
 }
 
-/* 顶部总览 */
 .summary{
     background:linear-gradient(135deg,#2563eb,#3b82f6,#60a5fa);
     color:#fff;
@@ -46,153 +42,67 @@ body{
     gap:12px;
 }
 .sumLeft{flex:1;min-width:0}
-.summary .small{
-    font-size:14px;
-    opacity:.95;
-}
-.summary .money{
-    font-size:26px;
-    font-weight:700;
-    margin:4px 0;
-}
+.summary .small{font-size:14px;opacity:.95;}
+.summary .money{font-size:26px;font-weight:700;margin:4px 0;}
 .summaryRight{
     text-align:right;
     font-size:13px;
     opacity:.95;
-    min-width:110px;
+    min-width:130px;
     white-space:nowrap;
     font-weight:600;
 }
-.summaryRight b{
-    display:inline;
-    font-size:18px;
-    font-weight:700;
-}
+.summaryRight b{font-size:18px;font-weight:700;}
 
-/* 顶部按钮 */
-.topbar{
-    display:flex;
-    gap:6px;
-    flex-wrap:nowrap;
-}
-.topbar button{
-    flex:1;
-    min-width:0;
-    padding:8px 4px;
-    font-size:12px;
-    white-space:nowrap;
-}
+.topbar{display:flex;gap:6px;}
+.topbar button{flex:1;padding:8px 4px;font-size:12px;}
 
-/* 按钮 */
-button{
-    border:none;
-    border-radius:10px;
-    cursor:pointer;
-}
+button{border:none;border-radius:10px;cursor:pointer;}
 .primary{background:#2563eb;color:#fff}
-.gray{background:#eef2f7;color:#333}
+.gray{background:#eef2f7}
 .red{background:#dc2626;color:#fff}
 .green{background:#16a34a;color:#fff}
 
-/* 类型标题 */
-.typeHead{
-    display:flex;
-    align-items:center;
-    gap:8px;
-}
-.typeTitle{
-    flex:1;
-    font-size:18px;
-    font-weight:700;
-    cursor:pointer;
-}
-.typeMoney{
-    font-size:14px;
-    color:#2563eb;
-    font-weight:700;
-}
-.smallBtn{
-    padding:6px 10px;
-    border-radius:999px;
-    font-size:12px;
-}
+.typeHead{display:flex;align-items:center;gap:8px;}
+.typeTitle{flex:1;font-size:18px;font-weight:700;cursor:pointer;}
+.typeMoney{font-size:14px;color:#2563eb;font-weight:700;}
+.smallBtn{padding:6px 10px;border-radius:999px;font-size:12px;}
 
-/* 基金 */
 .fund{
     margin-top:8px;
     border:1px solid #eef2f7;
     border-radius:12px;
     padding:10px;
     cursor:pointer;
-    transition:.15s;
 }
-.fund:hover{background:#f8fbff}
-.fundRow{
-    display:flex;
-    align-items:center;
-    gap:8px;
-}
-.fundName{
-    flex:1;
-    font-size:15px;
-    font-weight:700;
-    overflow:hidden;
-    white-space:nowrap;
-    text-overflow:ellipsis;
-}
-.fundInfo{
-    font-size:14px;
-    color:#2563eb;
-    font-weight:700;
-}
-.fundCode{
-    margin-top:4px;
-    font-size:12px;
-    color:#777;
-}
-.empty{
-    color:#888;
-    font-size:13px;
-    padding:8px 0 2px;
-}
+.fundRow{display:flex;align-items:center;gap:8px;}
+.fundName{flex:1;font-size:15px;font-weight:700;}
+.fundInfo{font-size:14px;color:#2563eb;font-weight:700;}
+.fundCode{font-size:12px;color:#777;margin-top:4px;}
+.fundHolding{font-size:13px;color:#16a34a;margin-top:4px;}
 
-/* 表单 */
+.empty{color:#888;font-size:13px;padding:8px 0;}
+
 input,select{
     width:100%;
     padding:10px;
     border:1px solid #d8deea;
     border-radius:10px;
-    font-size:14px;
     margin-bottom:8px;
 }
-.row2{
-    display:flex;
-    gap:8px;
-}
+
+.row2{display:flex;gap:8px;}
 .row2>*{flex:1}
 
-/* 弹窗 */
 .modal{
-    position:fixed;
-    inset:0;
+    position:fixed;inset:0;
     background:rgba(0,0,0,.45);
-    display:none;
-    align-items:center;
-    justify-content:center;
-    padding:18px;
-    z-index:999;
+    display:none;align-items:center;justify-content:center;
 }
 .modal.show{display:flex}
 .box{
-    width:100%;
-    max-width:420px;
-    background:#fff;
-    border-radius:18px;
-    padding:16px;
-}
-.box h3{
-    margin:0 0 12px;
-    font-size:18px;
+    width:100%;max-width:420px;
+    background:#fff;border-radius:18px;padding:16px;
 }
 </style>
 </head>
@@ -217,7 +127,6 @@ input,select{
 
 </div>
 
-<!-- 弹窗 -->
 <div class="modal" id="modal">
     <div class="box" id="modalBox"></div>
 </div>
@@ -225,28 +134,33 @@ input,select{
 <script>
 let data = JSON.parse(localStorage.getItem("fundManagerData") || "[]");
 
-/* 保存 */
 function save(){
     localStorage.setItem("fundManagerData",JSON.stringify(data));
     render();
 }
 
-/* 月换算 */
 function monthlyFund(f){
     let a=parseFloat(f.amount)||0;
     if(f.cycle==="日") return a*22;
     if(f.cycle==="周") return a*4;
     return a;
 }
+
 function monthlyType(t){
     return t.funds.reduce((s,f)=>s+monthlyFund(f),0);
 }
 
-/* 渲染 */
+function totalHolding(){
+    return data.reduce((sum,t)=>
+        sum + t.funds.reduce((s,f)=>s+(parseFloat(f.holding)||0),0)
+    ,0);
+}
+
 function render(){
 
     let total=data.reduce((s,t)=>s+monthlyType(t),0);
     let count=data.reduce((s,t)=>s+t.funds.length,0);
+    let holding=totalHolding();
 
     summaryBox.innerHTML=`
         <div class="summary">
@@ -255,7 +169,8 @@ function render(){
                 <div class="money">¥ ${total.toFixed(0)}</div>
             </div>
             <div class="summaryRight">
-                <b>${count}</b>支基金 / ${data.length}类
+                <b>${count}</b>支基金 / ${data.length}类<br>
+                总持仓：¥${holding.toFixed(0)}
             </div>
         </div>
     `;
@@ -264,7 +179,7 @@ function render(){
         <div class="card">
             <div class="typeHead">
                 <div class="typeTitle" onclick="editType(${t.id})">${t.name}</div>
-                <div class="typeMoney">月投 ¥${monthlyType(t).toFixed(0)}</div>
+                <div class="typeMoney">¥${monthlyType(t).toFixed(0)}/月</div>
                 <button class="green smallBtn" onclick="event.stopPropagation();addFund(${t.id})">+基金</button>
             </div>
 
@@ -277,6 +192,7 @@ function render(){
                         <div class="fundInfo">¥${f.amount}/${f.cycle}</div>
                     </div>
                     <div class="fundCode">${f.code||''}</div>
+                    <div class="fundHolding">持仓：¥${parseFloat(f.holding)||0}</div>
                 </div>
             `).join("")}
         </div>
@@ -287,7 +203,7 @@ function render(){
 function addType(){
 showModal(`
 <h3>新增基金类型</h3>
-<input id="newTypeName" placeholder="例如：指数基金">
+<input id="newTypeName">
 <div class="row2">
 <button class="gray" onclick="closeModal()">取消</button>
 <button class="primary" onclick="confirmAddType()">确定</button>
@@ -330,6 +246,7 @@ showModal(`
 <input id="fname" placeholder="基金名">
 <input id="fcode" placeholder="基金代码">
 <input id="famt" placeholder="金额">
+<input id="fholding" placeholder="持仓金额（默认0）">
 <select id="fcyc">
 <option>日</option>
 <option>周</option>
@@ -348,6 +265,7 @@ id:Date.now(),
 name:fname.value.trim(),
 code:fcode.value.trim(),
 amount:famt.value.trim(),
+holding:fholding.value.trim()||0,
 cycle:fcyc.value
 });
 closeModal();save();
@@ -362,6 +280,7 @@ showModal(`
 <input id="ename" value="${f.name}">
 <input id="ecode" value="${f.code||''}">
 <input id="eamt" value="${f.amount}">
+<input id="eholding" value="${f.holding||0}">
 <select id="ecyc">
 <option ${f.cycle==="日"?"selected":""}>日</option>
 <option ${f.cycle==="周"?"selected":""}>周</option>
@@ -379,9 +298,11 @@ let f=t.funds.find(x=>x.id===fid);
 f.name=ename.value.trim();
 f.code=ecode.value.trim();
 f.amount=eamt.value.trim();
+f.holding=eholding.value.trim()||0;
 f.cycle=ecyc.value;
 closeModal();save();
 }
+
 function deleteFund(tid,fid){
 if(!confirm("确定删除该基金？"))return;
 let t=data.find(x=>x.id===tid);
@@ -431,11 +352,11 @@ r.readAsText(f);
 
 /* Excel */
 function exportExcel(){
-let rows=[['基金类型','基金名','代码','金额','周期','月换算']];
+let rows=[['基金类型','基金名','代码','金额','周期','月换算','持仓']];
 data.forEach(t=>{
 t.funds.forEach(f=>{
 rows.push([
-t.name,f.name,f.code||'',f.amount,f.cycle,monthlyFund(f)
+t.name,f.name,f.code||'',f.amount,f.cycle,monthlyFund(f),f.holding||0
 ]);
 });
 });
@@ -449,6 +370,7 @@ a.click();
 
 render();
 </script>
+
 <script>
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('/sw.js');
