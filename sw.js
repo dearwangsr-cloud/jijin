@@ -1,7 +1,7 @@
 // 自动更新版 Service Worker
 // 适用于 GitHub + Netlify 部署的网页 App（PWA）
 
-const CACHE_NAME = 'fund-app-v20260514';
+const CACHE_NAME = 'fund-app-v20260518';
 
 // 需要预缓存的核心文件
 const CORE_ASSETS = [
